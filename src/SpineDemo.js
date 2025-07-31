@@ -136,7 +136,11 @@ export class SpineDemo {
 
     // For this demo, we'll create a simple animated sprite since Spine assets aren't included
     // In a real project, you would load your .json, .atlas, and .png files here
-    this.createPlaceholderCharacter();
+    try {
+      this.createPlaceholderCharacter();
+    } catch (error) {
+      throw error;
+    }
 
     return { success: true, assetsLoaded: ["placeholder-character"] };
   }
