@@ -46,7 +46,7 @@ jobs:
 
       - name: Check for merge conflicts
         run: |
-          git merge-tree $(git merge-base HEAD main) HEAD main | grep -q "^@@" && echo "::error::This PR has merge conflicts that must be resolved" && exit 1 || echo "No merge conflicts detected"
+          git merge-tree $(git merge-base HEAD main) HEAD main | grep -q "^@@" && echo "::error::This PR has merge conflicts that must be resolved" && exit 1 || echo "No merge conflicts detected" && exit 0
 
       - name: Run comprehensive tests
         run: |
