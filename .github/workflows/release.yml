@@ -56,7 +56,7 @@ jobs:
 
       - name: Create GitHub Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -81,19 +81,12 @@ jobs:
             🤖 *This release was automatically generated*
           draft: false
           prerelease: false
+          files: pixi-spine-demo-build.zip
 
       - name: Create zip archive of dist directory
         run: zip -r pixi-spine-demo-build.zip ./dist
 
-      - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: pixi-spine-demo-build.zip
-          asset_name: pixi-spine-demo-build.zip
-          asset_content_type: application/zip
+# Removed entirely
 
   deploy-production:
     name: Deploy to Production
