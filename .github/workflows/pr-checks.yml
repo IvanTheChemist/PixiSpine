@@ -46,7 +46,19 @@ jobs:
 
       - name: Check for merge conflicts
         run: |
-          git merge-tree $(git merge-base HEAD main) HEAD main | grep -q "^@@" && (echo "::error::This PR has merge conflicts that must be resolved" && exit 1) || (echo "No merge conflicts detected" && exit 0)
+          git fetch origin main
+          git checkout -b temp-merge-check
+          if ! git merge --no-commit --no-ff origin/main; then
+            echo "::error::This PR has merge conflicts that must be resolved"
+            git merge --abort
+            git checkout -
+            git branch -D temp-merge-check
+            exit 1
+          fi
+          echo "No merge conflicts detected"
+          git merge --abort
+          git checkout -
+          git branch -D temp-merge-check
 
       - name: Run comprehensive tests
         run: |
