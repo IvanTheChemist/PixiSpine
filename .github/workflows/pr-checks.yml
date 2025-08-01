@@ -91,7 +91,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            
+
             let coverageInfo = '';
             try {
               const coverage = JSON.parse(fs.readFileSync('coverage/coverage-final.json', 'utf8'));
