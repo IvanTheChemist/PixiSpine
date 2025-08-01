@@ -87,6 +87,7 @@ jobs:
 
       - name: PR Summary Comment
         uses: actions/github-script@v7
+        continue-on-error: true
         with:
           script: |
             const fs = require('fs');
@@ -114,11 +115,11 @@ jobs:
                 coverageInfo = '📊 Coverage report is unavailable due to unexpected file format.';
               }
             } catch (e) {
+              console.log('Coverage file not found, using fallback message');
               coverageInfo = '📊 Coverage report will be available after tests complete.';
             }
 
-            const comment = `
-            ## 🚀 PR Quality Check Results
+            const commentBody = `## 🚀 PR Quality Check Results
 
             ✅ **All automated checks passed!** This PR is ready for review.
 
@@ -132,15 +133,44 @@ jobs:
             - [x] Bundle size impact analyzed
 
             ---
-            🤖 *This comment is automatically updated when new commits are pushed.*
-            `;
+            🤖 *This comment is automatically updated when new commits are pushed.*`;
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+            try {
+              // Find existing comment to update or create new one
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+
+              const botComment = comments.find(comment => 
+                comment.user.type === 'Bot' && 
+                comment.body.includes('🚀 PR Quality Check Results')
+              );
+
+              if (botComment) {
+                // Update existing comment
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body: commentBody
+                });
+                console.log('Updated existing PR comment');
+              } else {
+                // Create new comment
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: commentBody
+                });
+                console.log('Created new PR comment');
+              }
+            } catch (error) {
+              console.log('Failed to create/update PR comment:', error.message);
+              // Don't fail the job if comment creation fails
+            }
 
   require-status-checks:
     name: Require Status Checks
