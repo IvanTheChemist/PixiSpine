@@ -95,16 +95,24 @@ jobs:
             let coverageInfo = '';
             try {
               const coverage = JSON.parse(fs.readFileSync('coverage/coverage-final.json', 'utf8'));
-              const total = coverage.total;
-              coverageInfo = `
-            ## 📊 Test Coverage Report
-            | Metric | Coverage | Threshold |
-            |--------|----------|-----------|
-            | Lines | ${total.lines.pct}% | 70% |
-            | Functions | ${total.functions.pct}% | 70% |
-            | Branches | ${total.branches.pct}% | 70% |
-            | Statements | ${total.statements.pct}% | 70% |
-            `;
+              if (coverage.total && 
+                  typeof coverage.total.lines?.pct === 'number' &&
+                  typeof coverage.total.functions?.pct === 'number' &&
+                  typeof coverage.total.branches?.pct === 'number' &&
+                  typeof coverage.total.statements?.pct === 'number') {
+                const total = coverage.total;
+                coverageInfo = `
+              ## 📊 Test Coverage Report
+              | Metric | Coverage | Threshold |
+              |--------|----------|-----------|
+              | Lines | ${total.lines.pct}% | 70% |
+              | Functions | ${total.functions.pct}% | 70% |
+              | Branches | ${total.branches.pct}% | 70% |
+              | Statements | ${total.statements.pct}% | 70% |
+              `;
+              } else {
+                coverageInfo = '📊 Coverage report is unavailable due to unexpected file format.';
+              }
             } catch (e) {
               coverageInfo = '📊 Coverage report will be available after tests complete.';
             }
