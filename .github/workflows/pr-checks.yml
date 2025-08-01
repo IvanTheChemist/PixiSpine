@@ -91,35 +91,25 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-
-            // Read test results if coverage file exists
+            
             let coverageInfo = '';
             try {
               const coverage = JSON.parse(fs.readFileSync('coverage/coverage-final.json', 'utf8'));
-              if (coverage.total && 
-                  typeof coverage.total.lines?.pct === 'number' &&
-                  typeof coverage.total.functions?.pct === 'number' &&
-                  typeof coverage.total.branches?.pct === 'number' &&
-                  typeof coverage.total.statements?.pct === 'number') {
+              if (coverage.total) {
                 const total = coverage.total;
-                coverageInfo = `
-              ## 📊 Test Coverage Report
-              | Metric | Coverage | Threshold |
-              |--------|----------|-----------|
-              | Lines | ${total.lines.pct}% | 70% |
-              | Functions | ${total.functions.pct}% | 70% |
-              | Branches | ${total.branches.pct}% | 70% |
-              | Statements | ${total.statements.pct}% | 70% |
-              `;
-              } else {
-                coverageInfo = '📊 Coverage report is unavailable due to unexpected file format.';
+                coverageInfo = `## 📊 Test Coverage Report
+            | Metric | Coverage | Threshold |
+            |--------|----------|-----------|
+            | Lines | ${total.lines.pct}% | 70% |
+            | Functions | ${total.functions.pct}% | 70% |
+            | Branches | ${total.branches.pct}% | 70% |
+            | Statements | ${total.statements.pct}% | 70% |`;
               }
             } catch (e) {
-              console.log('Coverage file not found, using fallback message');
               coverageInfo = '📊 Coverage report will be available after tests complete.';
             }
 
-            const commentBody = `## 🚀 PR Quality Check Results
+            const comment = `## 🚀 PR Quality Check Results
 
             ✅ **All automated checks passed!** This PR is ready for review.
 
@@ -135,42 +125,12 @@ jobs:
             ---
             🤖 *This comment is automatically updated when new commits are pushed.*`;
 
-            try {
-              // Find existing comment to update or create new one
-              const { data: comments } = await github.rest.issues.listComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-              });
-
-              const botComment = comments.find(comment => 
-                comment.user.type === 'Bot' && 
-                comment.body.includes('🚀 PR Quality Check Results')
-              );
-
-              if (botComment) {
-                // Update existing comment
-                await github.rest.issues.updateComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: botComment.id,
-                  body: commentBody
-                });
-                console.log('Updated existing PR comment');
-              } else {
-                // Create new comment
-                await github.rest.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: commentBody
-                });
-                console.log('Created new PR comment');
-              }
-            } catch (error) {
-              console.log('Failed to create/update PR comment:', error.message);
-              // Don't fail the job if comment creation fails
-            }
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
   require-status-checks:
     name: Require Status Checks
