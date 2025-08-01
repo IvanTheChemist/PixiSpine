@@ -54,6 +54,9 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Create zip archive of dist directory
+        run: zip -r pixi-spine-demo-build.zip ./dist
+
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -61,7 +64,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          release_name: Release v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
           body: |
             ## 🚀 What's New
 
@@ -82,11 +85,6 @@ jobs:
           draft: false
           prerelease: false
           files: pixi-spine-demo-build.zip
-
-      - name: Create zip archive of dist directory
-        run: zip -r pixi-spine-demo-build.zip ./dist
-
-# Removed entirely
 
   deploy-production:
     name: Deploy to Production
