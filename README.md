@@ -44,7 +44,7 @@ This project uses a robust CI/CD pipeline with the following quality gates:
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js Current or Active LTS (v20.9.0 or higher)
 - npm or yarn
 
 ### Installation
