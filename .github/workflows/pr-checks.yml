@@ -53,15 +53,19 @@ jobs:
         run: |
           git fetch origin main
           git checkout -b temp-merge-check
-          if ! git merge --no-commit --no-ff origin/main; then
+          if ! git merge --no-commit --no-ff FETCH_HEAD; then
             echo "::error::This PR has merge conflicts that must be resolved"
-            git merge --abort
+            if git rev-parse -q --verify MERGE_HEAD >/dev/null; then
+              git merge --abort
+            fi
             git checkout -
             git branch -D temp-merge-check
             exit 1
           fi
           echo "No merge conflicts detected"
-          git merge --abort
+          if git rev-parse -q --verify MERGE_HEAD >/dev/null; then
+            git merge --abort
+          fi
           git checkout -
           git branch -D temp-merge-check
 
