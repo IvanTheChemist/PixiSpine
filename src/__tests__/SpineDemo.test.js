@@ -160,6 +160,21 @@ describe("SpineDemo", () => {
       });
     });
 
+    test("should propagate placeholder creation failures", async () => {
+      const originalCreate = spineDemo.createPlaceholderCharacter;
+      spineDemo.createPlaceholderCharacter = jest.fn(() => {
+        throw new Error("Real spine loading error");
+      });
+
+      try {
+        await expect(spineDemo.loadSpineAssets()).rejects.toThrow(
+          "Real spine loading error"
+        );
+      } finally {
+        spineDemo.createPlaceholderCharacter = originalCreate;
+      }
+    });
+
     test("should create placeholder character", async () => {
       await spineDemo.init();
 
@@ -335,6 +350,16 @@ describe("SpineDemo", () => {
       const newScale = spineDemo.scaleCharacter(10);
       expect(newScale).toBe(4);
       expect(spineDemo.getSpineScale()).toBe(4);
+    });
+
+    test("should fall back to scale.x and scale.y when scale.set is unavailable", () => {
+      delete spineDemo.spine.scale.set;
+
+      const newScale = spineDemo.scaleCharacter(0.5);
+
+      expect(newScale).toBe(2.5);
+      expect(spineDemo.spine.scale.x).toBe(2.5);
+      expect(spineDemo.spine.scale.y).toBe(2.5);
     });
 
     test("should throw error when scaling without spine initialized", () => {
