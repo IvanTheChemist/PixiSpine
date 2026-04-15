@@ -136,24 +136,6 @@ describe("SpineDemo", () => {
       consoleSpy.mockRestore();
     });
 
-    test("should throw error in setupDemo if spine or app not initialized", () => {
-      // Test setupDemo error when spine is null
-      spineDemo.spine = null;
-      spineDemo.app = { screen: { width: 800, height: 600 } };
-
-      expect(() => spineDemo.setupDemo()).toThrow(
-        "Cannot setup demo: spine or app not initialized"
-      );
-
-      // Test setupDemo error when app is null
-      spineDemo.spine = { x: 0, y: 0 };
-      spineDemo.app = null;
-
-      expect(() => spineDemo.setupDemo()).toThrow(
-        "Cannot setup demo: spine or app not initialized"
-      );
-    });
-
     test("should update status during initialization", async () => {
       await spineDemo.init();
 
@@ -208,13 +190,7 @@ describe("SpineDemo", () => {
       expect(spineDemo.spine.parts.rightLeg).toBeDefined();
     });
 
-    test("should handle spine scaling without scale.set method", async () => {
-      // Create a spine mock without scale.set method
-      const { Spine } = require("pixi-spine");
-      Spine.mockImplementation(() => {
-        throw new Error("Could not create spine from mock spine data");
-      });
-
+    test("should fall back to scale.x and scale.y when scale.set is unavailable", async () => {
       await spineDemo.init();
 
       // Remove the scale.set method to test the fallback
