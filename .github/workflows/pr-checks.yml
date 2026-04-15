@@ -1,0 +1,157 @@
+name: PR Status Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  pr-checks:
+    name: PR Quality Gates
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y pkg-config libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+          requireScope: false
+
+      - name: Check for merge conflicts
+        run: |
+          git fetch origin main
+          git checkout -b temp-merge-check
+          if ! git merge --no-commit --no-ff FETCH_HEAD; then
+            echo "::error::This PR has merge conflicts that must be resolved"
+            if git rev-parse -q --verify MERGE_HEAD >/dev/null; then
+              git merge --abort
+            fi
+            git checkout -
+            git branch -D temp-merge-check
+            exit 1
+          fi
+          echo "No merge conflicts detected"
+          if git rev-parse -q --verify MERGE_HEAD >/dev/null; then
+            git merge --abort
+          fi
+          git checkout -
+          git branch -D temp-merge-check
+
+      - name: Run comprehensive tests
+        run: |
+          echo "Running test suite..."
+          npm test
+          echo "✅ All tests passed"
+
+      - name: Verify test coverage
+        run: |
+          echo "Checking test coverage requirements..."
+          npm run test:coverage
+          echo "✅ Coverage requirements met"
+
+      - name: Check build integrity
+        run: |
+          echo "Verifying build process..."
+          npm run build
+          echo "✅ Build completed successfully"
+
+      - name: Size impact analysis
+        uses: preactjs/compressed-size-action@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: "./dist/**/*.{js,css,html}"
+          strip-hash: "\\.(\\w{8})\\."
+
+      - name: PR Summary Comment
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          script: |
+            const fs = require('fs');
+
+            let coverageInfo = '';
+            try {
+              const coverage = JSON.parse(fs.readFileSync('coverage/coverage-final.json', 'utf8'));
+              if (coverage.total) {
+                const total = coverage.total;
+                coverageInfo = `## 📊 Test Coverage Report
+            | Metric | Coverage | Threshold |
+            |--------|----------|-----------|
+            | Lines | ${total.lines.pct}% | 70% |
+            | Functions | ${total.functions.pct}% | 70% |
+            | Branches | ${total.branches.pct}% | 70% |
+            | Statements | ${total.statements.pct}% | 70% |`;
+              }
+            } catch (e) {
+              coverageInfo = '📊 Coverage report will be available after tests complete.';
+            }
+
+            const comment = `## 🚀 PR Quality Check Results
+
+            ✅ **All automated checks passed!** This PR is ready for review.
+
+            ${coverageInfo}
+
+            ## 📋 What was verified:
+            - [x] All tests pass
+            - [x] Coverage thresholds met (70%+)
+            - [x] Build completes successfully
+            - [x] No merge conflicts
+            - [x] Bundle size impact analyzed
+
+            ---
+            🤖 *This comment is automatically updated when new commits are pushed.*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  require-status-checks:
+    name: Require Status Checks
+    runs-on: ubuntu-latest
+    needs: [pr-checks]
+    if: always()
+
+    steps:
+      - name: Check required status
+        run: |
+          if [[ "${{ needs.pr-checks.result }}" != "success" ]]; then
+            echo "::error::Required PR checks failed. Please fix issues before merging."
+            exit 1
+          fi
+          echo "✅ All required checks passed - PR is ready for merge"
