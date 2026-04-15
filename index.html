@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PixiJS Spine Demo</title><style>body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            z-index: 100;
+        }</style><script defer="defer" src="bundle.js"></script></head><body><div id="game-container"><div class="loading" id="loading">Loading Spine Demo...</div></div><div class="ui-overlay" id="info"><h3>PixiJS Spine Demo</h3><p>Status: <span id="status">Initializing...</span></p><p>Animation: <span id="current-animation">None</span></p><p>FPS: <span id="fps">0</span></p></div><div class="controls" id="controls" style="display: none;"><button id="play-idle">Idle</button> <button id="play-walk">Walk</button> <button id="play-run">Run</button> <button id="play-jump">Jump</button> <button id="scale-up">Scale +</button> <button id="scale-down">Scale -</button></div></body></html>
