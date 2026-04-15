@@ -16,7 +16,7 @@ A demo application showcasing Spine 3 animations with PixiJS and webpack.
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js Current or Active LTS (v20.9.0 or higher)
 - npm or yarn
 
 ### Installation

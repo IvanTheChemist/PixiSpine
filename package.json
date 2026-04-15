@@ -27,6 +27,9 @@
   ],
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "devDependencies": {
     "webpack": "^5.88.0",
     "webpack-cli": "^5.1.4",
