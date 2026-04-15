@@ -212,7 +212,7 @@ This project uses GitHub Actions for continuous integration and deployment:
 
 - **CI Pipeline** (`ci.yml`): Runs on all pushes and PRs
 
-  - Multi-Node.js version testing (18.x, 20.x)
+  - Multi-Node.js version testing (Current, LTS)
   - Automated testing and coverage reporting
   - Build verification
   - Security auditing

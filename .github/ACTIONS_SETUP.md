@@ -11,7 +11,7 @@ This document provides an overview of the CI/CD pipeline implemented for the Pix
 
 #### Jobs
 
-- **test**: Multi-Node.js version testing (18.x, 20.x)
+- **test**: Multi-Node.js version testing (Current, LTS)
 
   - Install dependencies with `npm ci`
   - Run linting (if available)
