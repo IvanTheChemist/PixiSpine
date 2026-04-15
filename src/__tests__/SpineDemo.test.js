@@ -185,15 +185,14 @@ describe("SpineDemo", () => {
         throw new Error("Real spine loading error");
       });
 
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
-
-      await expect(spineDemo.loadSpineAssets()).rejects.toThrow(
-        "Real spine loading error"
-      );
-
-      // Restore original method
-      spineDemo.createPlaceholderCharacter = originalCreate;
-      consoleSpy.mockRestore();
+      try {
+        await expect(spineDemo.loadSpineAssets()).rejects.toThrow(
+          "Real spine loading error"
+        );
+      } finally {
+        // Restore original method even if the expectation fails
+        spineDemo.createPlaceholderCharacter = originalCreate;
+      }
     });
 
     test("should create placeholder character", async () => {
