@@ -160,6 +160,23 @@ describe("SpineDemo", () => {
       });
     });
 
+    test("should throw error for non-mock spine creation failures", async () => {
+      // Mock createPlaceholderCharacter to throw an error
+      const originalCreate = spineDemo.createPlaceholderCharacter;
+      spineDemo.createPlaceholderCharacter = jest.fn(() => {
+        throw new Error("Real spine loading error");
+      });
+
+      try {
+        await expect(spineDemo.loadSpineAssets()).rejects.toThrow(
+          "Real spine loading error"
+        );
+      } finally {
+        // Restore original method even if the expectation fails
+        spineDemo.createPlaceholderCharacter = originalCreate;
+      }
+    });
+
     test("should create placeholder character", async () => {
       await spineDemo.init();
 
@@ -171,6 +188,22 @@ describe("SpineDemo", () => {
       expect(spineDemo.spine.parts.rightArm).toBeDefined();
       expect(spineDemo.spine.parts.leftLeg).toBeDefined();
       expect(spineDemo.spine.parts.rightLeg).toBeDefined();
+    });
+
+    test("should fall back to scale.x and scale.y when scale.set is unavailable", async () => {
+      await spineDemo.init();
+
+      // Remove the scale.set method to test the fallback
+      delete spineDemo.spine.scale.set;
+
+      // Test that it uses scale.x and scale.y instead
+      const initialX = spineDemo.spine.scale.x;
+      const initialY = spineDemo.spine.scale.y;
+
+      spineDemo.scaleCharacter(0.5);
+
+      expect(spineDemo.spine.scale.x).not.toBe(initialX);
+      expect(spineDemo.spine.scale.y).not.toBe(initialY);
     });
 
     test("should have all animations available after loading", async () => {
@@ -311,6 +344,90 @@ describe("SpineDemo", () => {
       spineDemo.animate(1);
       // Should not crash and should not update time
       expect(spineDemo.isDestroyed).toBe(true);
+    });
+
+    test("should handle jump animation branches correctly", () => {
+      spineDemo.playAnimation("jump");
+
+      // Test high jump scenario (jumpHeight > 40)
+      spineDemo.spine.animationTime = Math.PI / 6; // Should give jumpHeight = 80 > 40
+      spineDemo.animate(1);
+      expect(spineDemo.spine.parts.body.scale.y).toBe(1.2);
+      expect(spineDemo.spine.parts.leftArm.y).toBe(-30);
+      expect(spineDemo.spine.parts.rightArm.y).toBe(-30);
+
+      // Test low jump scenario (jumpHeight < 20)
+      spineDemo.spine.animationTime = Math.PI; // Should give jumpHeight = 0 < 20
+      spineDemo.animate(1);
+      expect(spineDemo.spine.parts.leftLeg.scale.y).toBe(0.8);
+      expect(spineDemo.spine.parts.rightLeg.scale.y).toBe(0.8);
+
+      // Test middle jump scenario (20 <= jumpHeight <= 40)
+      spineDemo.spine.animationTime = 0.15; // Should give jumpHeight ≈ 35
+      spineDemo.animate(1);
+      expect(spineDemo.spine.parts.body.scale.y).toBe(1);
+      expect(spineDemo.spine.parts.leftArm.y).toBe(0);
+      expect(spineDemo.spine.parts.rightArm.y).toBe(0);
+      expect(spineDemo.spine.parts.leftLeg.scale.y).toBe(1);
+      expect(spineDemo.spine.parts.rightLeg.scale.y).toBe(1);
+    });
+
+    test("should properly execute idle animation breathing effect", () => {
+      spineDemo.playAnimation("idle");
+      spineDemo.spine.animationTime = 0;
+
+      const initialBodyScale = spineDemo.spine.parts.body.scale.y;
+      const initialHeadY = spineDemo.spine.parts.head.y;
+
+      spineDemo.animate(1);
+
+      // The breathing effect should modify body scale and head position
+      expect(spineDemo.spine.parts.body.scale.y).not.toBe(initialBodyScale);
+      expect(spineDemo.spine.parts.head.y).not.toBe(initialHeadY);
+    });
+
+    test("should properly execute walk animation leg movement", () => {
+      spineDemo.playAnimation("walk");
+      spineDemo.spine.animationTime = 0;
+
+      const initialLeftLegRotation = spineDemo.spine.parts.leftLeg.rotation;
+      const initialRightLegRotation = spineDemo.spine.parts.rightLeg.rotation;
+
+      spineDemo.animate(1);
+
+      // The walk animation should modify leg rotations
+      expect(spineDemo.spine.parts.leftLeg.rotation).not.toBe(
+        initialLeftLegRotation
+      );
+      expect(spineDemo.spine.parts.rightLeg.rotation).not.toBe(
+        initialRightLegRotation
+      );
+    });
+
+    test("should properly execute run animation with enhanced movement", () => {
+      spineDemo.playAnimation("run");
+      spineDemo.spine.animationTime = 0;
+
+      const initialLeftArmRotation = spineDemo.spine.parts.leftArm.rotation;
+      const initialRightArmRotation = spineDemo.spine.parts.rightArm.rotation;
+      const initialLeftLegRotation = spineDemo.spine.parts.leftLeg.rotation;
+      const initialRightLegRotation = spineDemo.spine.parts.rightLeg.rotation;
+
+      spineDemo.animate(1);
+
+      // The run animation should modify both arm and leg rotations
+      expect(spineDemo.spine.parts.leftArm.rotation).not.toBe(
+        initialLeftArmRotation
+      );
+      expect(spineDemo.spine.parts.rightArm.rotation).not.toBe(
+        initialRightArmRotation
+      );
+      expect(spineDemo.spine.parts.leftLeg.rotation).not.toBe(
+        initialLeftLegRotation
+      );
+      expect(spineDemo.spine.parts.rightLeg.rotation).not.toBe(
+        initialRightLegRotation
+      );
     });
   });
 
