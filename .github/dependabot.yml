@@ -13,7 +13,7 @@ updates:
     assignees:
       - "IvanTheChemist"
     commit-message:
-      prefix: "deps"
+      prefix: "chore: npm"
       include: "scope"
     labels:
       - "dependencies"
@@ -32,7 +32,7 @@ updates:
     assignees:
       - "IvanTheChemist"
     commit-message:
-      prefix: "ci"
+      prefix: "chore: ci"
       include: "scope"
     labels:
       - "github-actions"
