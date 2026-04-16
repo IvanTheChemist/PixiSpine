@@ -51,7 +51,7 @@
     "babel-jest": "^30.3.0"
   },
   "dependencies": {
-    "pixi.js": "^7.3.0",
+    "pixi.js": "^8.18.1",
     "pixi-spine": "^4.0.4"
   },
   "jest": {
