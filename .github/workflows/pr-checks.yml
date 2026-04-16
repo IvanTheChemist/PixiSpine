@@ -54,6 +54,7 @@ jobs:
             build
             ci
             chore
+            deps(deps-dev):
           requireScope: false
 
       - name: Check for merge conflicts
