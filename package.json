@@ -46,7 +46,7 @@
     "@testing-library/user-event": "^14.4.3",
     "canvas": "^3.2.1",
     "identity-obj-proxy": "^3.0.0",
-    "@babel/core": "^7.22.0",
+    "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.2",
     "babel-jest": "^29.6.0"
   },
