@@ -28,7 +28,7 @@
   "author": "",
   "license": "MIT",
   "engines": {
-    "node": ">=24"
+    "node": ">=24.0.0"
   },
   "devDependencies": {
     "webpack": "^5.106.2",

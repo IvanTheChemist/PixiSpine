@@ -10,23 +10,22 @@ permissions:
   contents: read
   packages: read
 
+env:
+  NODE_VERSION: "24"
+
 jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: ["lts/*", "current"]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
       - name: Install native build dependencies
@@ -66,7 +65,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
       - name: Install native build dependencies
@@ -98,7 +97,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
       - name: Install native build dependencies
@@ -128,7 +127,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
       - name: Install native build dependencies
