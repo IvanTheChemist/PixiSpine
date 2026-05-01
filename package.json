@@ -36,7 +36,7 @@
     "webpack-dev-server": "^5.2.2",
     "html-webpack-plugin": "^5.5.3",
     "css-loader": "^7.1.4",
-    "style-loader": "^3.3.3",
+    "style-loader": "^4.0.0",
     "file-loader": "^6.2.0",
     "url-loader": "^4.1.1",
     "jest": "^30.3.0",
